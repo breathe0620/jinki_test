@@ -1,0 +1,138 @@
+buildscript {
+	ext {
+		springBootVersion = '1.5.2.RELEASE'
+		querydslVersion = '4.3.1'
+		elasticSearchVersion = '5.3.2'
+	}
+	repositories {
+		mavenCentral()
+		maven { url "https://repo.spring.io/snapshot" }
+		maven { url "https://repo.spring.io/milestone" }
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath 'org.springframework:springloaded:1.2.4.RELEASE'
+	}
+}
+
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'war'
+
+war {
+	baseName 'mubeat-cms'
+	version 'SNAPSHOT-0.0.1'
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+	maven { url "https://repo.spring.io/snapshot" }
+	maven { url "https://repo.spring.io/milestone" }
+}
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter')
+	compile('org.springframework.boot:spring-boot-starter-web')
+	compile('org.springframework.boot:spring-boot-starter-aop')
+	compile('org.springframework.boot:spring-boot-starter-data-jpa')
+	compile('org.springframework.boot:spring-boot-starter-jdbc')
+	compile('org.springframework.boot:spring-boot-starter-tomcat')
+	compile('org.springframework.boot:spring-boot-starter-security')
+	compile("org.springframework.boot:spring-boot-starter-websocket")
+	compile('org.apache.tomcat.embed:tomcat-embed-jasper')
+	compile('javax.servlet:jstl:1.2')
+	compile('mysql:mysql-connector-java:5.1.34')
+	compile('com.querydsl:querydsl-core')
+	compile('com.querydsl:querydsl-apt')
+	compile('com.querydsl:querydsl-jpa')
+	compile('ch.qos.logback:logback-classic:1.1.11')
+	compile('ch.qos.logback:logback-core:1.1.11')
+	compile('org.slf4j:slf4j-api:1.7.6')
+	compile('io.springfox:springfox-swagger2:2.5.0')
+	compile('io.springfox:springfox-swagger-ui:2.5.0')
+	compile('org.elasticsearch:elasticsearch:5.3.2')
+	compile('org.elasticsearch.client:transport:5.3.2')
+	compile('org.apache.logging.log4j:log4j-to-slf4j:2.7')
+	compile('org.slf4j:slf4j-api:1.7.21')
+	compile('org.springframework.cloud:spring-cloud-aws-context:1.1.4.RELEASE')
+
+	compile('org.springframework.boot:spring-boot-devtools')
+	compile('org.springframework.boot:spring-boot-starter-freemarker:1.1.7.RELEASE')
+
+	compile('com.amazonaws:aws-java-sdk-cloudfront:1.11.83') // AWS CloudFront
+	compile('com.amazonaws:aws-java-sdk-emr:1.11.83') // AWS ElasticMapReduce
+	compile('com.amazonaws:aws-java-sdk-ses:1.11.83') // AWS SES
+	compile('com.amazonaws:aws-java-sdk-dynamodb:1.11.83') // AWS DynamoDB
+
+	compile('redis.clients:jedis:2.9.0') // Jedis
+	compile('org.springframework.boot:spring-boot-starter-data-redis') // Redis
+//	compile('org.springframework.session:spring-session-data-redis:1.3.1.RELEASE') // Redis Session
+
+	compile('org.json:json:20170516') // Json
+
+	// EXCEL
+	compile('org.apache.poi:poi-ooxml-schemas:3.17-beta1')
+	compile('org.apache.poi:poi-ooxml:3.17-beta1')
+
+	// XSS Script Defence
+	compile("com.navercorp.lucy:lucy-xss:1.6.3")
+	compile("com.navercorp.lucy:lucy-xss-servlet:2.0.0")
+
+	// WebJars
+	compile("org.webjars:webjars-locator")
+	compile("org.webjars:sockjs-client:1.0.2")
+	compile("org.webjars:stomp-websocket:2.3.3")
+
+//	compile('com.jcraft:jsch:0.1.54') // SFTP
+
+	compile('org.apache.commons:commons-io:1.3.2') // Apache Commons
+
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+sourceSets {
+	generated {
+		java {
+			srcDirs =  ["src/main/generated"]
+		}
+	}
+}
+
+configurations {
+	querydslapt
+}
+
+task generateQueryDSL(type: JavaCompile, group: 'build', description: 'Generates the QueryDSL query types') {
+	source = sourceSets.main.java
+	classpath = configurations.compile + configurations.querydslapt
+	options.compilerArgs = [
+			"-proc:only",
+			"-processor", "com.querydsl.apt.jpa.JPAAnnotationProcessor"
+	]
+	options.encoding = 'UTF-8'
+	destinationDir = sourceSets.generated.java.srcDirs.iterator().next()
+}
+
+compileJava {
+	dependsOn generateQueryDSL
+	source generateQueryDSL.destinationDir
+}
+
+compileGeneratedJava {
+	dependsOn generateQueryDSL
+	options.warnings = false
+	classpath += sourceSets.main.runtimeClasspath
+}
+
+clean {
+	// clean-up directory when necessary
+	delete sourceSets.generated.java.srcDirs.iterator().next()
+}
+
+bootRun {
+	jvmArgs = ["-Djava.net.preferIPv4Stack=true", "-Dspring.profiles.active=dev", "-Dspring.output.ansi.enabled=always", "-Dfile.encoding=UTF-8"]
+}

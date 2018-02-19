@@ -1,0 +1,49 @@
+input.parsley-success,
+select.parsley-success,
+textarea.parsley-success,
+.parsley-success ~ span>.selection>.select2-selection--single,
+div.parsley-success{
+  color: #468847;
+  background-color: rgb(242, 251, 240) !important;
+  border: 0 !important;
+}
+
+.editorForm input.parsley-success,
+.editorForm .parsley-success ~ span>.selection>.select2-selection--single{
+  color: #468847;
+  background-color: rgb(242, 251, 240) !important;
+  border: 1px solid #ccc !important;
+}
+
+input.parsley-error,
+select.parsley-error,
+textarea.parsley-error,
+.parsley-error ~ span>.selection>.select2-selection--single,
+div.parsley-error{
+  color: #B94A48;
+  background-color: rgb(255, 240, 240) !important;
+  border: 0 !important;
+}
+.editorForm .parsley-error ~ span>.selection>.select2-selection--single,
+.editorForm input.parsley-error{
+  color: #B94A48;
+  background-color: rgb(255, 240, 240) !important;
+  border: 1px solid #ccc !important;
+}
+
+.parsley-errors-list {
+  position: absolute;
+  top: 0.3em;
+  right: 6px;
+  opacity: 0;
+  font-weight: bold;
+  color: #f44545;
+  font-size: 11px;
+  text-transform: uppercase;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.parsley-errors-list.filled {
+  opacity: 1;
+}
